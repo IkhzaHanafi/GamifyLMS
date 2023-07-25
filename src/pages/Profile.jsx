@@ -158,10 +158,10 @@ const ProfilePage = () => {
         <ExitToAppIcon />
       </LogoutIcon>
 
-      <ProfileAvatar alt={userData2?.namaLengkap} src={userData2?.photoUrl} />
+      <ProfileAvatar alt={userData?.namaLengkap} src={userData2?.photoUrl} />
 
       <Typography variant="h5" gutterBottom>
-        {userData2?.namaLengkap}
+        {userData?.namaLengkap}
       </Typography>
 
       {userData2?.level ? (

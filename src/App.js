@@ -43,11 +43,11 @@ const router = createBrowserRouter([
     element: <Chat />,
   },
   {
-    path: "/class/modul/:id",
+    path: "/class/:classId/modul/:id",
     element: <Modul />,
   },
   {
-    path: "/class/quiz/:id",
+    path: "/class/:classId/quiz/:id",
     element: <MaterialQuiz />,
   },
   {
@@ -55,7 +55,7 @@ const router = createBrowserRouter([
     element: <Discussions />,
   },
   {
-    path: "/class/task/:id",
+    path: "/class/:classId/task/:id",
     element: <ClassTask />,
   },
   {

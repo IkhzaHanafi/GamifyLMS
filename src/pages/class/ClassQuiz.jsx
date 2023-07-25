@@ -1,62 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Typography, Container, Card, CardContent, Button, LinearProgress } from '@mui/material';
-import { Link } from 'react-router-dom';
-
-const quizData = [
-  {
-    question: 'Apa yang dimaksud dengan UI dalam konteks desain?',
-    options: ['User Interaction', 'User Interface', 'User Integration', 'User Interest'],
-    correctAnswer: 'User Interface',
-  },
-  {
-    question: 'Apa yang dimaksud dengan UX dalam konteks desain?',
-    options: ['User Experience', 'User Excellence', 'User Expression', 'User Expansion'],
-    correctAnswer: 'User Experience',
-  },
-  {
-    question: 'Apa yang dimaksud dengan wireframe dalam desain UI/UX?',
-    options: ['Presentasi visual produk akhir', 'Desain akhir yang interaktif', 'Ilustrasi tampilan visual', 'Sketsa kasar struktur halaman'],
-    correctAnswer: 'Sketsa kasar struktur halaman',
-  },
-  {
-    question: 'Apa yang dimaksud dengan "persona" dalam UX design?',
-    options: ['Pencitraan merek', 'Pemirsa target yang fiktif', 'Keahlian dalam desain UI', 'Teknik animasi interaktif'],
-    correctAnswer: 'Pemirsa target yang fiktif',
-  },
-  {
-    question: 'Apa tujuan dari usability testing (pengujian kegunaan) dalam desain UI/UX?',
-    options: ['Meningkatkan performa website', 'Memperindah tampilan visual', 'Menguji keamanan sistem', 'Memvalidasi kode sumber'],
-    correctAnswer: 'Meningkatkan performa website',
-  },
-  {
-    question: 'Apakah perbedaan antara UI dan UX?',
-    options: ['UI berfokus pada kepuasan pengguna, UX pada estetika', 'UI berfokus pada estetika, UX pada kepuasan pengguna', 'UI berfokus pada perancangan, UX pada pengembangan', 'UI berfokus pada pengembangan, UX pada perancangan'],
-    correctAnswer: 'UI berfokus pada estetika, UX pada kepuasan pengguna',
-  },
-  {
-    question: 'Apa manfaat dari membuat prototipe dalam desain UI/UX?',
-    options: ['Menampilkan versi final dari produk', 'Memvalidasi desain sebelum implementasi', 'Mengurangi waktu pengembangan', 'Menggantikan tahap pengujian kegunaan'],
-    correctAnswer: 'Memvalidasi desain sebelum implementasi',
-  },
-  {
-    question: 'Apa yang dimaksud dengan "affordance" dalam desain UI?',
-    options: ['Keterbacaan teks pada layar', 'Tampilan visual yang menarik', 'Kemampuan elemen untuk memberi petunjuk penggunaan', 'Kapasitas penyimpanan data pada perangkat'],
-    correctAnswer: 'Kemampuan elemen untuk memberi petunjuk penggunaan',
-  },
-  {
-    question: 'Bagaimana cara meningkatkan UX pada aplikasi mobile?',
-    options: ['Menambahkan lebih banyak fitur', 'Mengurangi interaksi pengguna', 'Mempercepat waktu respons aplikasi', 'Menggunakan ikon yang tidak familiar'],
-    correctAnswer: 'Mempercepat waktu respons aplikasi',
-  },
-  {
-    question: 'Apa itu "information architecture" dalam konteks desain UX?',
-    options: ['Proses menyusun informasi dalam tata letak visual', 'Studi tentang psikologi pengguna', 'Teknik mengkodekan data informasi', 'Ilmu komputer dan statistik'],
-    correctAnswer: 'Proses menyusun informasi dalam tata letak visual',
-  },
-  // Tambahkan pertanyaan lainnya sesuai kebutuhan
-];
-
+import { Link, useParams } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { firestore } from '../../firebase';
 
 const QuizContainer = styled(Container)`
   && {
@@ -117,8 +64,33 @@ const HomeButton = styled(Button)`
 `;
 
 const ClassQuiz = () => {
+  const { classId } = useParams();
+  const { id } = useParams();
+  const [quizData, setQuizData] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [quizTitle, setQuizTitle] = useState('');
+
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        const quizDocRef = doc(firestore, 'classes', classId, 'quizzes', id);
+        const quizDocSnap = await getDoc(quizDocRef);
+
+        if (quizDocSnap.exists()) {
+          // Convert the quiz document data to an object and set it to the state
+          setQuizData(quizDocSnap.data().questions);
+          setQuizTitle(quizDocSnap.data().title);
+        } else {
+          console.log('Quiz not found!');
+        }
+      } catch (error) {
+        console.error('Error fetching quiz data:', error);
+      }
+    };
+
+    fetchQuizData();
+  }, [id]);
 
   // Logic to handle answer selection
   const handleAnswerSelect = (selectedAnswer) => {
@@ -134,15 +106,15 @@ const ClassQuiz = () => {
   return (
     <QuizContainer maxWidth="sm">
       <QuizTitle>
-        <Typography variant="h4">Quiz</Typography>
+        <Typography variant="h4">{quizTitle}</Typography>
       </QuizTitle>
 
       {isQuizCompleted ? (
         <QuizResult>
           <Typography variant="h5">Quiz Selesai! Score: {score}</Typography>
-          <Link to="/">
+          <Link to={`/class/${classId}`}>
             <HomeButton variant="contained" color="primary">
-              Back to Home
+              Selesai
             </HomeButton>
           </Link>
         </QuizResult>
@@ -175,3 +147,60 @@ const ClassQuiz = () => {
 };
 
 export default ClassQuiz;
+
+
+
+// const quizData = [
+//   {
+//     question: 'Apa yang dimaksud dengan UI dalam konteks desain?',
+//     options: ['User Interaction', 'User Interface', 'User Integration', 'User Interest'],
+//     correctAnswer: 'User Interface',
+//   },
+//   {
+//     question: 'Apa yang dimaksud dengan UX dalam konteks desain?',
+//     options: ['User Experience', 'User Excellence', 'User Expression', 'User Expansion'],
+//     correctAnswer: 'User Experience',
+//   },
+//   {
+//     question: 'Apa yang dimaksud dengan wireframe dalam desain UI/UX?',
+//     options: ['Presentasi visual produk akhir', 'Desain akhir yang interaktif', 'Ilustrasi tampilan visual', 'Sketsa kasar struktur halaman'],
+//     correctAnswer: 'Sketsa kasar struktur halaman',
+//   },
+//   {
+//     question: 'Apa yang dimaksud dengan "persona" dalam UX design?',
+//     options: ['Pencitraan merek', 'Pemirsa target yang fiktif', 'Keahlian dalam desain UI', 'Teknik animasi interaktif'],
+//     correctAnswer: 'Pemirsa target yang fiktif',
+//   },
+//   {
+//     question: 'Apa tujuan dari usability testing (pengujian kegunaan) dalam desain UI/UX?',
+//     options: ['Meningkatkan performa website', 'Memperindah tampilan visual', 'Menguji keamanan sistem', 'Memvalidasi kode sumber'],
+//     correctAnswer: 'Meningkatkan performa website',
+//   },
+//   {
+//     question: 'Apakah perbedaan antara UI dan UX?',
+//     options: ['UI berfokus pada kepuasan pengguna, UX pada estetika', 'UI berfokus pada estetika, UX pada kepuasan pengguna', 'UI berfokus pada perancangan, UX pada pengembangan', 'UI berfokus pada pengembangan, UX pada perancangan'],
+//     correctAnswer: 'UI berfokus pada estetika, UX pada kepuasan pengguna',
+//   },
+//   {
+//     question: 'Apa manfaat dari membuat prototipe dalam desain UI/UX?',
+//     options: ['Menampilkan versi final dari produk', 'Memvalidasi desain sebelum implementasi', 'Mengurangi waktu pengembangan', 'Menggantikan tahap pengujian kegunaan'],
+//     correctAnswer: 'Memvalidasi desain sebelum implementasi',
+//   },
+//   {
+//     question: 'Apa yang dimaksud dengan "affordance" dalam desain UI?',
+//     options: ['Keterbacaan teks pada layar', 'Tampilan visual yang menarik', 'Kemampuan elemen untuk memberi petunjuk penggunaan', 'Kapasitas penyimpanan data pada perangkat'],
+//     correctAnswer: 'Kemampuan elemen untuk memberi petunjuk penggunaan',
+//   },
+//   {
+//     question: 'Bagaimana cara meningkatkan UX pada aplikasi mobile?',
+//     options: ['Menambahkan lebih banyak fitur', 'Mengurangi interaksi pengguna', 'Mempercepat waktu respons aplikasi', 'Menggunakan ikon yang tidak familiar'],
+//     correctAnswer: 'Mempercepat waktu respons aplikasi',
+//   },
+//   {
+//     question: 'Apa itu "information architecture" dalam konteks desain UX?',
+//     options: ['Proses menyusun informasi dalam tata letak visual', 'Studi tentang psikologi pengguna', 'Teknik mengkodekan data informasi', 'Ilmu komputer dan statistik'],
+//     correctAnswer: 'Proses menyusun informasi dalam tata letak visual',
+//   },
+//   // Tambahkan pertanyaan lainnya sesuai kebutuhan
+// ];
+

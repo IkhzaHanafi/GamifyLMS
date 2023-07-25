@@ -22,8 +22,8 @@ const StyledContainer = styled(Container)`
 
 const StyledClassListContainer = styled.div`
 width: 100%;
-  max-height: 600px; /* Set the desired maximum height for the class list container */
-  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 600px;
+  overflow-y: auto; 
 `;
 
 const StyledCard = styled(Card)`
