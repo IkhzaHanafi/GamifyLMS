@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Typography, Container, Avatar, LinearProgress, Card, CardContent, IconButton } from '@mui/material';
+import { Typography, Container, Avatar, Card, CardContent, IconButton } from '@mui/material';
 import BottomNavbar from '../components/BottomNavbar';
 import { doc, getDoc } from "firebase/firestore";
-import { firestore, auth  } from '../firebase';
+import { firestore, auth } from '../firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import checkAuthStatus from '../auth';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import LinearProgress from '@mui/material/LinearProgress';
+import addExpToUser from '../utils/levelingUtils'
 
 const userData2 = {
   photoUrl: 'https://example.com/user-photo.jpg', // Replace with the URL of the user's photo
@@ -17,14 +19,134 @@ const userData2 = {
   achievements: [
     { id: 1, title: 'Achievement 1', avatarUrl: 'https://example.com/achievement1.jpg' },
     { id: 2, title: 'Achievement 2', avatarUrl: 'https://example.com/achievement2.jpg' },
-    // Add more achievements as needed
-  ],
-  classes: [
-    { id: 1, className: 'Class A' },
-    { id: 2, className: 'Class B' },
-    // Add more classes as needed
   ],
 };
+
+const ProfilePage = () => {
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userClasses, setUserClasses] = useState([]);
+
+  useEffect(() => {
+    // Retrieve classesData from localStorage
+    const classesData = JSON.parse(localStorage.getItem('userClasses'));
+    setUserClasses(classesData);
+  }, []);
+
+  useEffect(() => {
+    checkAuthStatus()
+      .then((user) => {
+        // User is authenticated, fetch user data from Firestore and save to local storage
+        const docRef = doc(firestore, 'users', user.uid); // Assuming you have a collection named "users" in Firestore
+        // addExpToUser(user.uid, 90)
+        getDoc(docRef)
+          .then((docSnap) => {
+            if (docSnap.exists()) {
+              const userData = docSnap.data();
+              // Save user data to local storage
+              localStorage.setItem('userData', JSON.stringify(userData));
+              // For example, set user data to state or perform other actions
+              setUserData(userData);
+            } else {
+              // User document does not exist in Firestore
+              console.log('No user data found in Firestore!');
+            }
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            setIsLoading(false);
+            console.log('Error fetching user data:', error);
+          });
+      })
+      .catch((error) => {
+        // User is not authenticated, redirect to login page
+        // navigate('/login');
+        setIsLoading(false);
+      });
+  }, [navigate]);
+
+
+  const calculateProgress = (currentExp, totalExpNeeded) => {
+    return (currentExp / totalExpNeeded) * 100;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      localStorage.removeItem('userData');
+      navigate('/login');
+    } catch (error) {
+      console.log('Error logging out:', error);
+    }
+  };
+
+  // Function to calculate remaining Exp to reach next level
+  const calculateRemainingExp = (currentExp, expThreshold) => {
+    return currentExp % expThreshold;
+  };
+
+  return (
+    <ProfileContainer maxWidth="sm">
+      <LogoutIcon onClick={handleLogout}>
+        <ExitToAppIcon />
+      </LogoutIcon>
+
+      {
+        isLoading ? ( // Render loading state while fetching data
+          <Typography variant="h5">Loading...</Typography>
+        ) : (
+          <>
+            <ProfileAvatar alt={userData?.namaLengkap} src={userData?.photoUrl} />
+
+            <Typography variant="h5" gutterBottom>
+              {userData?.namaLengkap}
+            </Typography>
+            <LevelText variant="subtitle1">Level {userData?.level}</LevelText>
+            <LevelInfo>
+              <LinearProgress
+                sx={
+                  {
+                    width: '100%',
+                    height: '10px',
+                  }
+                }
+                variant="determinate"
+                value={calculateProgress(calculateRemainingExp(userData?.exp, 500), 500)}
+              />
+              <Typography variant="body2">
+                {calculateRemainingExp(userData?.exp, 500)} Exp / {500} Exp
+              </Typography>
+            </LevelInfo>
+            {/* <Typography variant="h6" gutterBottom>
+              Penghargaan
+            </Typography> */}
+            {/* <AchievementsContainer>
+              {userData2?.achievements?.map((achievement) => (
+                <Avatar key={achievement.id} alt={achievement.title} src={achievement.avatarUrl} />
+              ))}
+            </AchievementsContainer> */}
+
+            <Typography variant="h6" gutterBottom>
+              Daftar kelas yang diikuti
+            </Typography>
+            {userClasses.map((classData) => (
+              <ClassCard key={classData.id}>
+                <CardContent>
+                  <ClassTitle>{classData.className}</ClassTitle>
+                </CardContent>
+              </ClassCard>
+            ))}
+          </>
+        )
+      }
+      < BottomNavbar />
+    </ProfileContainer>
+  );
+};
+
+export default ProfilePage;
+
 
 const LogoutIcon = styled(IconButton)`
   && {
@@ -61,7 +183,9 @@ const LevelInfo = styled.div`
 && {
     display: flex;
     align-items: center;
+    text-align: center;
     margin-bottom: 16px;
+    width: 100%;
 }
   
 `;
@@ -104,104 +228,3 @@ const ClassTitle = styled(Typography)`
     margin-bottom: 16px;
   }
 `;
-
-const ProfilePage = () => {
-  const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    checkAuthStatus()
-      .then((user) => {
-        // User is authenticated, fetch user data from Firestore and save to local storage
-        const docRef = doc(firestore, 'users', user.uid); // Assuming you have a collection named "users" in Firestore
-        getDoc(docRef)
-          .then((docSnap) => {
-            if (docSnap.exists()) {
-              const userData = docSnap.data();
-              // Save user data to local storage
-              localStorage.setItem('userData', JSON.stringify(userData));
-              // For example, set user data to state or perform other actions
-              setUserData(userData);
-            } else {
-              // User document does not exist in Firestore
-              console.log('No user data found in Firestore!');
-            }
-          })
-          .catch((error) => {
-            console.log('Error fetching user data:', error);
-          });
-      })
-      .catch((error) => {
-        // User is not authenticated, redirect to login page
-        navigate('/login');
-      });
-  }, [navigate]);
-
-
-  const calculateProgress = (currentExp, totalExpNeeded) => {
-    return (currentExp / totalExpNeeded) * 100;
-  };
-
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      localStorage.removeItem('userData');
-      navigate('/login');
-    } catch (error) {
-      console.log('Error logging out:', error);
-    }
-  };
-
-  return (
-    <ProfileContainer maxWidth="sm">
-      <LogoutIcon  onClick={handleLogout}>
-        <ExitToAppIcon />
-      </LogoutIcon>
-
-      <ProfileAvatar alt={userData?.namaLengkap} src={userData2?.photoUrl} />
-
-      <Typography variant="h5" gutterBottom>
-        {userData?.namaLengkap}
-      </Typography>
-
-      {userData2?.level ? (
-        <LevelInfo>
-          <LevelText variant="subtitle1">Level {userData2?.level}</LevelText>
-          <LinearProgress
-            variant="determinate"
-            value={calculateProgress(userData2?.exp, userData2?.totalExpNeeded)}
-          />
-          <Typography variant="body2">
-            {userData2?.exp} Exp / {userData2?.totalExpNeeded} Exp
-          </Typography>
-        </LevelInfo>
-      ) : (
-        <Typography variant="body1">Level is not defined</Typography>
-      )}
-
-      <Typography variant="h6" gutterBottom>
-        Penghargaan
-      </Typography>
-      <AchievementsContainer>
-        {userData2?.achievements?.map((achievement) => (
-          <Avatar key={achievement.id} alt={achievement.title} src={achievement.avatarUrl} />
-        ))}
-      </AchievementsContainer>
-
-      <Typography variant="h6" gutterBottom>
-        Daftar kelas yang diikuti
-      </Typography>
-      {userData2?.classes?.map((classData) => (
-        <ClassCard key={classData.id}>
-          <CardContent>
-            <ClassTitle>{classData.className}</ClassTitle>
-            {/* Add any additional content for the class card here */}
-          </CardContent>
-        </ClassCard>
-      ))}
-      <BottomNavbar />
-    </ProfileContainer>
-  );
-};
-
-export default ProfilePage;

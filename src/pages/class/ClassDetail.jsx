@@ -164,11 +164,11 @@ const ClassView = () => {
     <>
       <StyledAppBar position="static">
         <StyledToolbar>
-          <IconButton edge="start" color="inherit" onClick={() => navigate(-1)} aria-label="back">
+          <IconButton edge="start" color="inherit" onClick={() => navigate('/')} aria-label="back">
             <ArrowBackIcon />
           </IconButton>
           <StyledClassName variant="h6">{classData?.className}</StyledClassName>
-          <div></div> {/* Add any additional content to the header here */}
+          <div>Class ID : {classId}</div> {/* Add any additional content to the header here */}
         </StyledToolbar>
       </StyledAppBar>
 

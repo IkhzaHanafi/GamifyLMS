@@ -93,6 +93,7 @@ const Home = () => {
                     userClasses.push({ id: doc.id, ...doc.data() }); // Add the id field along with the class data
                   });
                   setClassesData(userClasses);
+                  localStorage.setItem('userClasses', JSON.stringify(userClasses));
                 })
                 .catch((error) => {
                   console.error('Error fetching classes:', error);

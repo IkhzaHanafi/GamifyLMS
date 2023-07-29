@@ -72,6 +72,8 @@ const Register = () => {
             namaLengkap: namaLengkap,
             username: username,
             email: email,
+            level: 0,
+            exp: 0,
           });
 
           // Registration and data saving success
@@ -118,15 +120,6 @@ const Register = () => {
         onChange={(e) => setNamaLengkap(e.target.value)}
         margin="normal"
       />
-
-      {/* <TextField
-        fullWidth
-        label="NIM"
-        variant="outlined"
-        value={nim}
-        onChange={(e) => setNim(e.target.value)}
-        margin="normal"
-      /> */}
       <TextField
         fullWidth
         label="Email"
@@ -135,7 +128,6 @@ const Register = () => {
         onChange={(e) => setEmail(e.target.value)}
         margin="normal"
       />
-
       <TextField
         fullWidth
         label="Username"
@@ -144,7 +136,6 @@ const Register = () => {
         onChange={(e) => setUsername(e.target.value)}
         margin="normal"
       />
-
       <TextField
         fullWidth
         label="Password"
@@ -154,8 +145,6 @@ const Register = () => {
         onChange={(e) => setPassword(e.target.value)}
         margin="normal"
       />
-
-      
 
       <StyledButton variant="contained" onClick={handleRegister} fullWidth>
         Register
