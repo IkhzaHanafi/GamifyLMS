@@ -10,17 +10,17 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import LinearProgress from '@mui/material/LinearProgress';
 import addExpToUser from '../utils/levelingUtils'
 
-const userData2 = {
-  photoUrl: 'https://example.com/user-photo.jpg', // Replace with the URL of the user's photo
-  userName: 'John Doe', // Replace with the user's name
-  level: 3,
-  exp: 350,
-  totalExpNeeded: 500, // The total experience points needed to level up
-  achievements: [
-    { id: 1, title: 'Achievement 1', avatarUrl: 'https://example.com/achievement1.jpg' },
-    { id: 2, title: 'Achievement 2', avatarUrl: 'https://example.com/achievement2.jpg' },
-  ],
-};
+// const userData2 = {
+//   photoUrl: 'https://example.com/user-photo.jpg', // Replace with the URL of the user's photo
+//   userName: 'John Doe', // Replace with the user's name
+//   level: 3,
+//   exp: 350,
+//   totalExpNeeded: 500, // The total experience points needed to level up
+//   achievements: [
+//     { id: 1, title: 'Achievement 1', avatarUrl: 'https://example.com/achievement1.jpg' },
+//     { id: 2, title: 'Achievement 2', avatarUrl: 'https://example.com/achievement2.jpg' },
+//   ],
+// };
 
 const ProfilePage = () => {
   const navigate = useNavigate();
